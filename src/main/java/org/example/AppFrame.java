@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AppFrame extends JFrame {
     private JPanel topLayoutPanel;
@@ -29,6 +31,7 @@ public class AppFrame extends JFrame {
     private JCheckBox[] checkBoxes;
     private JTextArea logTextArea;
     private JLabel loadingIcon;
+    private JComboBox<Integer> numberOfTaskDownloadOptions;
 
     public AppFrame() {
         initComponents();
@@ -36,9 +39,10 @@ public class AppFrame extends JFrame {
 
     private void initComponents() {
         setTitle("Manga Downloader");
-        setSize(895, 600);
+        setSize(1000, 600);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
         handleTopComponent();
         handleCenterComponent();
         handleBottomComponent();
@@ -78,6 +82,11 @@ public class AppFrame extends JFrame {
         checkAllCheckBox.setVisible(false);
         getLinkPanel.add(chooseDirectoryButton);
 
+        getLinkPanel.add(new JLabel("Task download:"));
+        Integer[] options = Constant.NUMBER_OF_TASK_DOWNLOAD;
+        numberOfTaskDownloadOptions = new JComboBox<>(options);
+        getLinkPanel.add(numberOfTaskDownloadOptions);
+
         JPanel infoLinkPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel sourceTitle = new JLabel("Source:");
         sourceLabel = new JLabel("");
@@ -116,7 +125,7 @@ public class AppFrame extends JFrame {
         logTextArea = new JTextArea();
         logTextArea.setEditable(false);
         logTextArea.setRows(10);
-        logTextArea.setColumns(73);
+        logTextArea.setColumns(90);
         logPanel.add(new JScrollPane(logTextArea));
 
         bottomLayoutPanel.add(downloadPanel);
@@ -229,22 +238,39 @@ public class AppFrame extends JFrame {
 
     private SwingWorker<Void, String> downloadMultipleChaptersWorker(Component[] components) {
         return new SwingWorker<Void, String>() {
+            int tasksCompleted = 0;
             @Override
             protected Void doInBackground() {
+                Object numberOfTask = numberOfTaskDownloadOptions.getSelectedItem();
+                int numberOfThreads = (numberOfTask instanceof Integer) ? (int) numberOfTask : 1;
+                ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+
                 for (int i = 0; i < components.length; i++) {
-                    Component component = components[i];
-                    if (component instanceof JCheckBox) {
-                        JCheckBox checkBox = (JCheckBox) component;
-                        if (!checkBox.isSelected()) {
-                            continue;
+                    int finalI = i;
+                    Runnable task = () -> {
+                        Component component = components[finalI];
+                        if (component instanceof JCheckBox) {
+                            JCheckBox checkBox = (JCheckBox) component;
+                            if (checkBox.isSelected()) {
+                                Chapter selectedChapter = (Chapter) checkBox.getClientProperty(Constant.CHAPTER);
+                                String checkBoxTitle = selectedChapter.getTitle();
+                                publish("Downloading chapter: " + checkBoxTitle);
+                                JFrameUtils.updateCheckboxContent(finalI, checkBoxTitle + " downloading...", chapterPanel);
+                                connector.downloadFromURL(connector, selectedChapter, directoryField.getText(), logTextArea);
+                                JFrameUtils.updateCheckboxContent(finalI, checkBoxTitle + " done", chapterPanel);
+                            }
+                            synchronized (this) {
+                                tasksCompleted++;
+                                if (tasksCompleted == components.length) {
+                                    JOptionPane.showMessageDialog(null, Constant.DOWNLOAD_COMPLETED,
+                                            Constant.DOWNLOAD_STATUS_TITLE, JOptionPane.INFORMATION_MESSAGE);
+                                    JFrameUtils.endDownloadChapter(getChapterButton, downloadButton, chooseDirectoryButton);
+                                    logTextArea.setText("");
+                                }
+                            }
                         }
-                        Chapter selectedChapter = (Chapter) checkBox.getClientProperty(Constant.CHAPTER);
-                        String checkBoxTitle = selectedChapter.getTitle();
-                        publish("Downloading chapter: " + checkBoxTitle);
-                        JFrameUtils.updateCheckboxContent(i, checkBoxTitle + " downloading...", chapterPanel);
-                        connector.downloadFromURL(connector, selectedChapter, directoryField.getText(), logTextArea);
-                        JFrameUtils.updateCheckboxContent(i, checkBoxTitle + " done", chapterPanel);
-                    }
+                    };
+                    executor.execute(task);
                 }
                 return null;
             }
@@ -254,14 +280,6 @@ public class AppFrame extends JFrame {
                 for (String message : chunks) {
                     logTextArea.append(message + "\n");
                 }
-            }
-
-            @Override
-            protected void done() {
-                JOptionPane.showMessageDialog(null, Constant.DOWNLOAD_COMPLETED,
-                        Constant.DOWNLOAD_STATUS_TITLE, JOptionPane.INFORMATION_MESSAGE);
-                JFrameUtils.endDownloadChapter(getChapterButton, downloadButton, chooseDirectoryButton);
-                logTextArea.setText("");
             }
         };
     }

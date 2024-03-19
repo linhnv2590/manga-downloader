@@ -13,4 +13,5 @@ public class Constant {
     public static final String DEFAULT_SAVE_DIRECTORY = ConnectorServicesImp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     public static final Integer CHROME_WAIT_TIMEOUT = 10;
     public static final Integer TOO_MANY_REQUEST_TIMEOUT = 500;
+    public static final Integer[] NUMBER_OF_TASK_DOWNLOAD = {1, 2, 3, 4, 5};
 }
