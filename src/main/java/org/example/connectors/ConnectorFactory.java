@@ -1,65 +1,43 @@
 package org.example.connectors;
 
-import org.example.connectors.templates.*;
+import com.google.common.reflect.ClassPath;
+import org.example.utils.Constant;
 import org.example.utils.HttpUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConnectorFactory {
+    static List<Connector> connectorList = new ArrayList<>();
     private ConnectorFactory() {
     }
 
-    public enum ConnectorType {
-        BLOGTRUYEN(Collections.singletonList("https://blogtruyenmoi.com/")),
-        CHAPVN(Collections.singletonList("https://chap.vn/")),
-        KENHSINHVIEN(Collections.singletonList("https://kenhsinhvien.vn/")),
-        NETTRUYEN(Collections.singletonList("https://nettruyenx.com/")),
-        NHASACHMIENPHI(Collections.singletonList("https://nhasachmienphi.com/")),
-        THIENHATRUYEN(Collections.singletonList("https://thienhatruyen.net/")),
-        THEGIOIMANGA(Collections.singletonList("https://thegioimanga.vn/")),
-        TRUYENQQ(Collections.singletonList("https://truyenqqvn.com/")),
-        TRUYENQQVN(Collections.singletonList("https://truyenqqvn.vn/"));
+    public static Connector getConnector(String url) {
+        Optional<Connector> matchingConnector = connectorList.stream()
+                .filter(connector -> HttpUtils.isSameConnectorDomain(url, connector.getDomain()))
+                .findFirst();
+        return matchingConnector.orElse(null);
+    }
 
-        private final List<String> urls;
-
-        ConnectorType(List<String> urls) {
-            this.urls = urls;
-        }
-
-        public List<String> getUrls() {
-            return urls;
+    public static void loadConnector() {
+        try {
+            Set<Class<?>> classSet = ConnectorFactory.findAllClassesUsingGoogleGuice();
+            for (Class<?> aClass : classSet) {
+                Object object = aClass.newInstance();
+                connectorList.add((Connector) object);
+            }
+        } catch (Exception e) {
+            System.out.println("Load connector failed: " + e.getMessage());
         }
     }
 
-    public static Connector getConnector(String url) {
-        return Arrays.stream(ConnectorType.values())
-                .filter(type -> HttpUtils.isSameConnectorDomain(url, type.getUrls()))
-                .findFirst()
-                .map(type -> {
-                    switch (type) {
-                        case BLOGTRUYEN:
-                            return new BlogTruyenMoi(url);
-                        case CHAPVN:
-                            return new ChapVn(url);
-                        case KENHSINHVIEN:
-                            return new KenhSinhVien(url);
-                        case NETTRUYEN:
-                            return new NetTruyen(url);
-                        case NHASACHMIENPHI:
-                            return new NhaSachMienPhi(url);
-                        case THIENHATRUYEN:
-                            return new ThienHaTruyen(url);
-                        case THEGIOIMANGA:
-                            return new TheGioiManga(url);
-                        case TRUYENQQ:
-                            return new Truyenqq(url);
-                        case TRUYENQQVN:
-                            return new TruyenqqVn(url);
-                        default:
-                            return null;
-                    }
-                }).orElse(null);
+    private static Set<Class<?>> findAllClassesUsingGoogleGuice() throws IOException {
+        return ClassPath.from(ClassLoader.getSystemClassLoader())
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> clazz.getPackageName().equalsIgnoreCase(Constant.CONNECTOR_DIR))
+                .map(ClassPath.ClassInfo::load)
+                .collect(Collectors.toSet());
     }
 }

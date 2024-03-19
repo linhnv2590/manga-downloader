@@ -5,8 +5,9 @@ import org.example.connectors.Connector;
 import java.util.List;
 
 public class NhaSachMienPhi extends Connector {
-    public NhaSachMienPhi(String url) {
-        super("Nhà Sách Miễn Phí", "https://nhasachmienphi.com/", url);
+    public NhaSachMienPhi() {
+        setLabel("Nhà Sách Miễn Phí");
+        setDomain("https://nhasachmienphi.com/");
     }
 
     @Override

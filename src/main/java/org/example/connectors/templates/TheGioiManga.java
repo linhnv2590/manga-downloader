@@ -18,8 +18,9 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class TheGioiManga extends Connector {
-    public TheGioiManga(String url) {
-        super("Thế Giới Manga", "https://thegioimanga.vn/", url);
+    public TheGioiManga() {
+        setLabel("Thế Giới Manga");
+        setDomain("https://thegioimanga.vn/");
     }
 
     @Override

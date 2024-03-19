@@ -27,7 +27,7 @@ public class AppFrame extends JFrame {
     private JCheckBox checkAllCheckBox;
     private JLabel sourceLabel;
     private JLabel mangaTitle;
-    private transient Connector connector;
+    private Connector connector;
     private JCheckBox[] checkBoxes;
     private JTextArea logTextArea;
     private JLabel loadingIcon;
@@ -38,8 +38,9 @@ public class AppFrame extends JFrame {
     }
 
     private void initComponents() {
+        ConnectorFactory.loadConnector();
         setTitle("Manga Downloader");
-        setSize(1000, 600);
+        setSize(1100, 600);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -203,7 +204,7 @@ public class AppFrame extends JFrame {
                     JOptionPane.showMessageDialog(null, "Error: Cannot connect to server!", "Error", JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
-
+                connector.setUrl(url);
                 connector.setDocument(document);
                 Manga manga = connector.fetchManga();
                 List<Chapter> chapters = connector.fetchChapters();

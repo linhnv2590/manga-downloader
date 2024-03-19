@@ -14,4 +14,5 @@ public class Constant {
     public static final Integer CHROME_WAIT_TIMEOUT = 10;
     public static final Integer TOO_MANY_REQUEST_TIMEOUT = 500;
     public static final Integer[] NUMBER_OF_TASK_DOWNLOAD = {1, 2, 3, 4, 5};
+    public static final String CONNECTOR_DIR = "org.example.connectors.templates";
 }

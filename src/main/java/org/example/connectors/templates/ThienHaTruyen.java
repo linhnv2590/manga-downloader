@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class ThienHaTruyen extends Connector {
-    public ThienHaTruyen(String url) {
-        super("Thiên Hạ Truyện", "https://thienhatruyen.net/", url);
+    public ThienHaTruyen() {
+        setLabel("Thiên Hạ Truyện");
+        setDomain("https://thienhatruyen.net/");
     }
 
     @Override

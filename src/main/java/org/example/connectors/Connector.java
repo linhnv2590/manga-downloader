@@ -10,18 +10,15 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class Connector implements ConnectorServices {
-    private final String label;
-    private final String domain;
-    private final String url;
+    private String label;
+    private String domain;
+    private String url;
     private Document document;
     private Manga manga;
     protected final ConnectorServicesImp connectorServicesImp = new ConnectorServicesImp();
     protected Logger logger = Logger.getLogger(getClass().getName());
 
-    public Connector(String label, String domain, String url) {
-        this.label = label;
-        this.domain = domain;
-        this.url = url;
+    public Connector() {
     }
 
     @Override
@@ -82,5 +79,17 @@ public class Connector implements ConnectorServices {
     @Override
     public void setManga(Manga manga) {
         this.manga = manga;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

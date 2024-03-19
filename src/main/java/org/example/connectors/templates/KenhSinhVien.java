@@ -7,8 +7,9 @@ import org.example.connectors.Connector;
 import java.util.List;
 
 public class KenhSinhVien extends Connector {
-    public KenhSinhVien(String url) {
-        super("Kênh Sinh Viên", "https://kenhsinhvien.vn/", url);
+    public KenhSinhVien() {
+        setLabel("Kênh Sinh Viên");
+        setDomain("https://kenhsinhvien.vn/");
     }
 
     @Override

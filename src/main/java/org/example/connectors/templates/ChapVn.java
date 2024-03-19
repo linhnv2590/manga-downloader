@@ -6,8 +6,9 @@ import org.example.connectors.Connector;
 import java.util.List;
 
 public class ChapVn extends Connector {
-    public ChapVn(String url) {
-        super("Chapvn - Alo8", "https://chap.vn/", url);
+    public ChapVn() {
+        setLabel("Chapvn - Alo8");
+        setDomain("https://chap.vn/");
     }
 
     @Override

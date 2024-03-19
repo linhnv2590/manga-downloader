@@ -6,8 +6,9 @@ import org.example.connectors.Connector;
 import java.util.List;
 
 public class NetTruyen extends Connector {
-    public NetTruyen(String url) {
-        super("Nettruyen", "https://nettruyenx.com/", url);
+    public NetTruyen() {
+        setLabel("Nettruyen");
+        setDomain("https://nettruyenx.com/");
     }
 
     @Override

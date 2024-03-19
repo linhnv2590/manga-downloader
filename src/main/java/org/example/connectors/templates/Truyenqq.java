@@ -6,8 +6,9 @@ import org.example.connectors.Connector;
 import java.util.List;
 
 public class Truyenqq extends Connector {
-    public Truyenqq(String url) {
-        super("Truyenqq", "https://truyenqqvn.com/", url);
+    public Truyenqq() {
+        setLabel("Truyenqq");
+        setDomain("https://truyenqqvn.com/");
     }
 
     @Override
